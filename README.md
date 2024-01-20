@@ -1,6 +1,6 @@
-# app-template
-
-Used to create new (progressive) web apps and deploy them to a server running Docker and nginx-proxy for SSL cert generation.
+# exxpress-watch-count
+A simple app that shows the historical and live watch count of Austria's most useless, state funded publication, Exxpress. Why they
+get funding is anyone's guess. Nobody is watching this shit.
 
 ### Development
 

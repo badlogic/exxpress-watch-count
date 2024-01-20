@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 npm run build
-host=__app_host__
-host_dir=__app_host_dir__/__app_domain__
+host=slayer.marioslab.io
+host_dir=/home/badlogic/exxpress.marioslab.io
 current_date=$(date "+%Y-%m-%d %H:%M:%S")
 commit_hash=$(git rev-parse HEAD)
 echo "{\"date\": \"$current_date\", \"commit\": \"$commit_hash\"}" > html/version.json
@@ -12,7 +12,7 @@ rsync -avz --exclude node_modules --exclude .git --exclude data --exclude docker
 
 if [ "$1" == "server" ]; then
     echo "Publishing client & server"
-    ssh -t $host "__app_secrets__ && cd $host_dir && ./docker/control.sh stop && ./docker/control.sh start && ./docker/control.sh logs"
+    ssh -t $host "export EXPRESS-WATCH-COUNT_DB=$EXPRESS-WATCH-COUNT_DB && export EXPRESS-WATCH-COUNT_DB_USER=$EXPRESS-WATCH-COUNT_DB_USER && export EXPRESS-WATCH-COUNT_DB_PASSWORD=$EXPRESS-WATCH-COUNT_DB_PASSWORD && cd $host_dir && ./docker/control.sh stop && ./docker/control.sh start && ./docker/control.sh logs"
 else
     echo "Publishing client only"
 fi

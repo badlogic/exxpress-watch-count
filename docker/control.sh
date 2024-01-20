@@ -2,7 +2,7 @@
 
 set -e
 
-project=__app_name__
+project=express-watch-count
 
 printHelp () {
 	echo "Usage: control.sh <command>"

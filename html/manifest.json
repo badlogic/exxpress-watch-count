@@ -1,7 +1,7 @@
 {
-    "name": "__app_name__",
-    "short_name": "__app_name__",
-    "description": "__app_description__",
+    "name": "express-watch-count",
+    "short_name": "express-watch-count",
+    "description": "A super duper app",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#000c15",
