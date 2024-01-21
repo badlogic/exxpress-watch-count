@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "body-parser": "^1.20.2",
+    "chart.js": "^4.4.1",
     "chokidar": "^3.5.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -50,7 +51,7 @@
     "build:server": "node ./esbuild.server.mjs",
     "build:site": "node ./esbuild.site.mjs",
     "clean": "rimraf html/build",
-    "dev": "concurrently \"npx tsc --noEmit --preserveWatchOutput --watch\" \"npm run build:site -- --watch\" \"npm run build:css -- --watch\" \"npm run build:server -- --watch\" \"./docker/control.sh startdev\"",
+    "dev": "concurrently -r \"npx tsc --noEmit --preserveWatchOutput --watch\" \"npm run build:site -- --watch\" \"npm run build:css -- --watch\" \"npm run build:server -- --watch\" \"./docker/control.sh startdev\"",
     "format": "npx prettier --write .",
     "prepare": "husky install"
   },

@@ -1,6 +1,13 @@
 # exxpress-watch-count
-A simple app that shows the historical and live watch count of Austria's most useless, state funded publication, Exxpress. Why they
+
+A simple app that shows the historical and live watch count of Austria's most useless, state funded publication, eXXpress. Why they
 get funding is anyone's guess. Nobody is watching this shit.
+
+### Environment
+
+```
+export EXPRESS_WATCH_COUNT_YOUTUBE_KEY="<your YouTube API key>"
+```
 
 ### Development
 

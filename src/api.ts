@@ -79,7 +79,7 @@ export function toUrlBody(params: JsonValue) {
 }
 
 export class Api {
-    static async hello() {
-        return apiGet<{ message: string }>("hello");
+    static async history() {
+        return apiGet<{ timestamp: number; count: number }[]>("history");
     }
 }

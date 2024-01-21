@@ -73,6 +73,7 @@ export class Store {
     }
 }
 
+Store.setTheme("dark");
 const theme = Store.getTheme();
 if (theme == "dark") document.documentElement.classList.add("dark");
 else document.documentElement.classList.remove("dark");

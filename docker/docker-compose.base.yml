@@ -19,6 +19,7 @@ services:
         stop_grace_period: 0s
         environment:
             PORT: 3333
+            YOUTUBE_API_KEY: ${EXPRESS_WATCH_COUNT_YOUTUBE_KEY}
         volumes:
             - ./data:/data
             - ../:/app
