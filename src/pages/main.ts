@@ -1,6 +1,6 @@
 import { PropertyValueMap, html } from "lit";
 import { Api } from "../api.js";
-import { BaseElement } from "../app.js";
+import { BaseElement, getScrollParent } from "../app.js";
 import { pageContainerStyle, pageContentStyle } from "../utils/styles.js";
 export { Store } from "../utils/store.js";
 import { Chart, registerables } from "chart.js";
@@ -35,6 +35,7 @@ export class MainPage extends BaseElement {
             return;
         }
         this.renderStats(response, responseSelf);
+        console.log("Updated chart data");
         setTimeout(() => this.fetchHistory(), 15000);
     }
 
@@ -86,10 +87,15 @@ export class MainPage extends BaseElement {
             startTime: number,
             endTime: number
         ) => {
+            const scrollY = getScrollParent(this)!.scrollTop;
+            const binnedData = binData(data, binSize, startTime, endTime);
             if ((canvas as any).__chart) {
-                (canvas as any).__chart.destroy();
-                (canvas as any).__chart = undefined;
+                const chart: Chart = (canvas as any).__chart;
+                chart.data.datasets[0].data = binnedData.map((entry) => entry.count);
+                chart.update();
+                return;
             }
+
             const chartOptions = {
                 animation: false, // Disable animations
                 scales: {
@@ -116,8 +122,6 @@ export class MainPage extends BaseElement {
                     },
                 },
             };
-            const binnedData = binData(data, binSize, startTime, endTime);
-
             const chart = new Chart(canvas, {
                 type: "bar",
                 data: {
@@ -156,8 +160,18 @@ export class MainPage extends BaseElement {
             data2: { timestamp: number; count: number }[]
         ) => {
             if ((canvas as any).__chart) {
-                (canvas as any).__chart.destroy();
-                (canvas as any).__chart = undefined;
+                const chart: Chart<
+                    "line",
+                    {
+                        x: Date;
+                        y: number;
+                    }[],
+                    unknown
+                > = (canvas as any).__chart;
+                chart.data.datasets[0].data = data1.map((entry) => ({ x: new Date(entry.timestamp), y: entry.count }));
+                chart.data.datasets[1].data = data2.map((entry) => ({ x: new Date(entry.timestamp), y: entry.count }));
+                chart.update();
+                return;
             }
             const chartOptions = {
                 animation: false, // Disable animations
@@ -211,6 +225,9 @@ export class MainPage extends BaseElement {
         };
 
         createVersusChart(versusCanvas, history, historySelf);
+        queueMicrotask(() => {
+            getScrollParent(this)!.scrollTop = scrollY;
+        });
     }
 
     render() {
