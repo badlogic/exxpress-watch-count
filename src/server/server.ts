@@ -14,22 +14,29 @@ if (!youtubeApiKey) {
     process.exit(-1);
 }
 
-const history: { timestamp: number; count: number }[] = [];
-
 (async () => {
     if (!fs.existsSync("docker/data")) {
         fs.mkdirSync("docker/data");
     }
-    if (fs.existsSync("docker/data/history.json")) {
-        history.push(...JSON.parse(fs.readFileSync("docker/data/history.json", "utf-8")));
+
+    const readHistory = (file: string) => {
+        const history: { timestamp: number; count: number }[] = [];
+        if (!fs.existsSync(file)) return history;
+        history.push(...JSON.parse(fs.readFileSync(file, "utf-8")));
         for (let i = 0; i < history.length; i++) {
+            let timestamp = history[i].timestamp;
+            if (typeof timestamp == "string") timestamp = parseInt(timestamp);
+            history[i].timestamp = timestamp;
             let count = history[i].count;
             if (!count) count = 0;
             else if (typeof count == "string") count = parseInt(count);
             history[i].count = count;
         }
-    } else {
-    }
+        return history;
+    };
+
+    const history = readHistory("docker/data/history.json");
+    const historySelf = readHistory("docker/data/history-self.json");
 
     const app = express();
     app.set("json spaces", 2);
@@ -41,13 +48,17 @@ const history: { timestamp: number; count: number }[] = [];
         res.json(history);
     });
 
-    const update = async () => {
-        const response = await fetch("https://www.googleapis.com/youtube/v3/videos?id=Z4z69xcu-eE&part=liveStreamingDetails&key=" + youtubeApiKey);
+    app.get("/api/historySelf", (req, res) => {
+        res.json(historySelf);
+    });
+
+    const getViewers = async (videoId: string, history: { timestamp: number; count: number }[], file: string) => {
+        const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=liveStreamingDetails&key=${youtubeApiKey}`);
         if (!response.ok) {
             console.error("Could not fetch data");
         } else {
             const json = await response.json();
-            fs.writeFileSync("docker/data/history.json", JSON.stringify(history, null, 2));
+            fs.writeFileSync(file, JSON.stringify(history, null, 2));
             let count = json.items[0].liveStreamingDetails.concurrentViewers;
             if (count) {
                 count = parseInt(count);
@@ -56,8 +67,13 @@ const history: { timestamp: number; count: number }[] = [];
             }
             history.push({ timestamp: new Date().getTime(), count: count });
         }
+    };
 
-        setTimeout(update, 15000);
+    const update = async () => {
+        getViewers("Z4z69xcu-eE", history, "docker/data/history.json");
+        getViewers("5LqKABevwYQ", historySelf, "docker/data/history-self.json");
+
+        setTimeout(update, 30000);
     };
     update();
 

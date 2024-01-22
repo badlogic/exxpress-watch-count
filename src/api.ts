@@ -82,4 +82,8 @@ export class Api {
     static async history() {
         return apiGet<{ timestamp: number; count: number }[]>("history");
     }
+
+    static async historySelf() {
+        return apiGet<{ timestamp: number; count: number }[]>("historySelf");
+    }
 }
