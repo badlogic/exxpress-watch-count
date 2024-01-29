@@ -14,6 +14,10 @@ export class MainPage extends BaseElement {
     @property()
     error?: string;
 
+    history: { timestamp: number; count: number }[] = [];
+    historySelf: { timestamp: number; count: number }[] = [];
+    historyGrace: { timestamp: number; count: number }[] = [];
+
     protected createRenderRoot(): Element | ShadowRoot {
         return this;
     }
@@ -34,12 +38,23 @@ export class MainPage extends BaseElement {
             this.error = "Whoops, da lief etwas falsch";
             return;
         }
-        this.renderStats(response, responseSelf);
+        const responseGrace = await Api.historyGrace();
+        if (responseGrace instanceof Error) {
+            this.error = "Whoops, da lief etwas falsch";
+            return;
+        }
+        this.history = response;
+        this.historySelf = responseSelf;
+        this.historyGrace = responseGrace;
+        this.renderStats();
         console.log("Updated chart data");
         setTimeout(() => this.fetchHistory(), 15000);
     }
 
-    renderStats(history: { timestamp: number; count: number }[], historySelf: { timestamp: number; count: number }[]) {
+    renderStats() {
+        const history = this.history;
+        const historySelf = this.historySelf;
+        const historyGrace = this.historyGrace;
         const current = this.querySelector<HTMLSpanElement>("#current")!;
         const hourCanvas = this.querySelector<HTMLCanvasElement>("#hour")!;
         const dayCanvas = this.querySelector<HTMLCanvasElement>("#day")!;
@@ -157,8 +172,18 @@ export class MainPage extends BaseElement {
         const createVersusChart = (
             canvas: HTMLCanvasElement,
             data1: { timestamp: number; count: number }[],
-            data2: { timestamp: number; count: number }[]
+            data2: { timestamp: number; count: number }[],
+            data3: { timestamp: number; count: number }[],
+            hours: number
         ) => {
+            const filter = (array: { timestamp: number; count: number }[], hours: number) => {
+                const oneDayAgo = Date.now() - hours * 60 * 60 * 1000;
+                return array.filter((item) => item.timestamp > oneDayAgo);
+            };
+            data1 = filter(data1, hours);
+            data2 = filter(data2, hours);
+            data3 = filter(data3, hours);
+
             if ((canvas as any).__chart) {
                 const chart: Chart<
                     "line",
@@ -170,6 +195,7 @@ export class MainPage extends BaseElement {
                 > = (canvas as any).__chart;
                 chart.data.datasets[0].data = data1.map((entry) => ({ x: new Date(entry.timestamp), y: entry.count }));
                 chart.data.datasets[1].data = data2.map((entry) => ({ x: new Date(entry.timestamp), y: entry.count }));
+                chart.data.datasets[2].data = data3.map((entry) => ({ x: new Date(entry.timestamp), y: entry.count }));
                 chart.update();
                 return;
             }
@@ -212,8 +238,16 @@ export class MainPage extends BaseElement {
                         {
                             label: "Zuseher Zähler",
                             data: data2.map((entry) => ({ x: new Date(entry.timestamp), y: entry.count })),
-                            backgroundColor: "rgba(255, 99, 132, 0.2)",
-                            borderColor: "rgba(255, 99, 132, 1)",
+                            backgroundColor: "rgba(132, 99, 255, 0.2)",
+                            borderColor: "rgba(132, 99, 255, 1)",
+                            borderWidth: 1,
+                            pointRadius: 0,
+                        },
+                        {
+                            label: "Gorilla Grace",
+                            data: data3.map((entry) => ({ x: new Date(entry.timestamp), y: entry.count })),
+                            backgroundColor: "rgba(255, 0, 0, 0.2)",
+                            borderColor: "rgba(255, 0, 0, 0.7)",
                             borderWidth: 1,
                             pointRadius: 0,
                         },
@@ -224,7 +258,8 @@ export class MainPage extends BaseElement {
             (canvas as any).__chart = chart;
         };
 
-        createVersusChart(versusCanvas, history, historySelf);
+        const hours = parseInt(this.querySelector<HTMLInputElement>("#versusHours")?.value ?? "12") ?? 12;
+        createVersusChart(versusCanvas, history, historySelf, historyGrace, hours);
         queueMicrotask(() => {
             getScrollParent(this)!.scrollTop = scrollY;
         });
@@ -255,20 +290,37 @@ export class MainPage extends BaseElement {
                 <span class="text-lg font-semibold underline">Zuseher aktuell</span>
                 <span class="text-[32px] font-semibold text-red-400" id="current"></span>
                 <span class="text-lg font-semibold underline">⌀ Zuseher pro Minute, letzte Stunde</span>
-                <canvas class="max-w-[550px]" id="hour"></canvas>
+                <canvas class="max-w-[750px]" id="hour"></canvas>
                 <span class="text-lg font-semibold underline">⌀ Zuseher pro Stunde, letzte 24 Stunden</span>
-                <canvas class="max-w-[550px]" id="day"></canvas>
+                <canvas class="max-w-[750px]" id="day"></canvas>
                 <span class="text-lg font-semibold underline">⌀ Zuseher pro Tag, letzte 7 Tage</span>
-                <canvas class="max-w-[550px]" id="week"></canvas>
+                <canvas class="max-w-[750px]" id="week"></canvas>
                 <span class="text-lg font-semibold underline">⌀ Zuseher pro Tag, letzte 30 Tage</span>
-                <canvas class="max-w-[550px]" id="month"></canvas>
+                <canvas class="max-w-[750px]" id="month"></canvas>
 
                 <span class="text-lg font-semibold underline">eXXpress TV Livestream</span>
-                <img class="h-24 w-24" src="images/vs.png" />
+                <img class="h-12 w-12" src="images/vs.png" />
                 <a href="https://www.youtube.com/watch?v=5LqKABevwYQ" class="text-blue-400 text-lg font-semibold underline"
-                    >Zuseher Zähler Livestream</a
+                    >Zuseher Zähler Livestream (nicht mehr live)</a
                 >
-                <canvas class="max-w-[550px]" id="versus"></canvas>
+                <a href="https://www.youtube.com/watch?v=yfSyjwY6zSQ" class="text-blue-400 text-lg font-semibold underline"
+                    >Gorilla Grace Livestream</a
+                >
+                <canvas class="max-w-[750px]" id="versus"></canvas>
+                <div class="flex items-center gap-2">
+                    <span>Letzte</span>
+                    <input
+                        class="bg-transparent border border-divider p-2 rounded appearance-none"
+                        style="-webkit-appearance: none; -moz-appearance: textfield;"
+                        id="versusHours"
+                        type="number"
+                        min="1"
+                        max="72"
+                        value="12"
+                        @change=${() => this.renderStats()}
+                    />
+                    <span>Stunde(n)</span>
+                </div>
 
                 <span class="mt-2 text-xs italic text-center"
                     >Mit Spucke und Tixo gebaut von <a class="text-blue-400" href="https://twitter.com/badlogicgames">Mario Zechner</a>, Ideas guy

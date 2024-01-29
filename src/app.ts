@@ -27,8 +27,18 @@ export class App extends LitElement {
             () => "eXXpress LOL"
         );
         router.addRoute(
+            "/sachslehner",
+            () => html`<sachslehner-page></sachslehner-page>`,
+            () => "Sachslehner Stats"
+        );
+        router.addRoute(
             "/404",
             () => renderError(i18n("Whoops, that page doesn't exist")),
+            () => "404"
+        );
+        router.addRoute(
+            "/channel/:channel",
+            () => html`<channel-page></channel-page>`,
             () => "404"
         );
 

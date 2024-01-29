@@ -37,6 +37,7 @@ if (!youtubeApiKey) {
 
     const history = readHistory("docker/data/history.json");
     const historySelf = readHistory("docker/data/history-self.json");
+    const historyGrace = readHistory("docker/data/history-grace.json");
 
     const app = express();
     app.set("json spaces", 2);
@@ -50,6 +51,10 @@ if (!youtubeApiKey) {
 
     app.get("/api/historySelf", (req, res) => {
         res.json(historySelf);
+    });
+
+    app.get("/api/historyGrace", (req, res) => {
+        res.json(historyGrace);
     });
 
     const getViewers = async (videoId: string, history: { timestamp: number; count: number }[], file: string) => {
@@ -70,8 +75,9 @@ if (!youtubeApiKey) {
     };
 
     const update = async () => {
-        getViewers("Z4z69xcu-eE", history, "docker/data/history.json");
+        getViewers("hn_fDuFsA04", history, "docker/data/history.json");
         getViewers("5LqKABevwYQ", historySelf, "docker/data/history-self.json");
+        getViewers("yfSyjwY6zSQ", historyGrace, "docker/data/history-grace.json");
 
         setTimeout(update, 30000);
     };

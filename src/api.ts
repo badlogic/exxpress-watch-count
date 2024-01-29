@@ -86,4 +86,8 @@ export class Api {
     static async historySelf() {
         return apiGet<{ timestamp: number; count: number }[]>("historySelf");
     }
+
+    static async historyGrace() {
+        return apiGet<{ timestamp: number; count: number }[]>("historyGrace");
+    }
 }
