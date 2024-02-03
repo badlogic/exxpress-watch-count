@@ -102,7 +102,6 @@ export class ChannelPage extends BaseElement {
             this.data = channelJson.videos;
             this.info = channelJson.info;
             const currentDate = new Date();
-            this.mostViewed = this.data.sort((a, b) => b.stats.viewCount - a.stats.viewCount).splice(0, 100);
             this.data = this.data.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
             this.renderStats();
         } catch (e) {
@@ -113,6 +112,7 @@ export class ChannelPage extends BaseElement {
     async renderStats() {
         const numVideos = parseInt(this.querySelector<HTMLInputElement>("#numVideos")!.value);
         const data = [...this.data].splice(0, numVideos);
+        this.mostViewed = [...data].sort((a, b) => b.stats.viewCount - a.stats.viewCount).splice(0, 100);
         this.chart("#videoViews", data, "Zuseher", (video) => video.stats.viewCount);
         this.chart("#videoComments", data, "Kommentare", (video) => video.stats.commentCount);
     }
@@ -142,9 +142,9 @@ export class ChannelPage extends BaseElement {
                     />
                     <span>Videos</span>
                 </div>
-                <canvas class="w-full flex-grow px-4 max-w-[720px]" id="videoViews"></canvas>
-                <canvas class="w-full flex-grow px-4 max-w-[720px]" id="videoComments"></canvas>
-                <h1 class="text-xl">Top 100 meistgesehen Videos</h1>
+                <canvas class="w-full flex-grow px-4" id="videoViews"></canvas>
+                <canvas class="w-full flex-grow px-4" id="videoComments"></canvas>
+                <h1 class="text-xl">Meistgesehene Videos</h1>
                 <div class="flex flex-col gap-2">
                     ${map(
                         this.mostViewed,

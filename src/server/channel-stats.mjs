@@ -1,5 +1,5 @@
 const apiKey = process.env.EXPRESS_WATCH_COUNT_YOUTUBE_KEY;
-const channels = ["gutenachtoesterreich", "eXXpressTV"];
+const channels = ["gutenachtoesterreich", "eXXpressTV", "kronetv", "oe24TV", "heuteat"];
 
 import * as fs from "fs";
 
