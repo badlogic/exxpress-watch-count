@@ -75,7 +75,7 @@ if (!youtubeApiKey) {
     };
 
     const update = async () => {
-        getViewers("hn_fDuFsA04", history, "docker/data/history.json");
+        getViewers("1Y2GWcKetLw", history, "docker/data/history.json");
         getViewers("5LqKABevwYQ", historySelf, "docker/data/history-self.json");
         getViewers("yfSyjwY6zSQ", historyGrace, "docker/data/history-grace.json");
 

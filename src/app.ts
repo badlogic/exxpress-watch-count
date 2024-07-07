@@ -41,6 +41,11 @@ export class App extends LitElement {
             () => html`<channel-page></channel-page>`,
             () => "404"
         );
+        router.addRoute(
+            "/twitter/:account",
+            () => html`<twitter-page></twitter-page>`,
+            () => "Twitter Stats"
+        );
 
         router.setRootRoute("/");
         router.setNotFoundRoot("/404");
